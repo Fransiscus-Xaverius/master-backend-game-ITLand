@@ -20,6 +20,16 @@ const getUser = async function(req,res){
     return res.status(200).send(result[0]);
 }
 
+const getAllUser = async function (req,res){
+    let [result, metadata] = await sequelize.query(
+        `SELECT username, SUM(gold) as total_gold
+        FROM gold
+        GROUP BY username`
+    )
+    console.log(result);
+    return res.status(200).send(result);
+}
+
 const getGold = async function(req,res){
     console.log('get-gold called');
     const username = req.query.username;
@@ -63,4 +73,4 @@ const addGold = async function(req,res){
     return res.status(200).send({msg:"updated gold"})
 }
 
-module.exports = {getUser,getUserCount,addGold,getGold};
+module.exports = {getUser,getUserCount,addGold,getGold,getAllUser};
