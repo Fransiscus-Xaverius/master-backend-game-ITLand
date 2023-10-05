@@ -21,6 +21,7 @@ const getUser = async function(req,res){
 }
 
 const getGold = async function(req,res){
+    console.log('get-gold called');
     const username = req.query.username;
     let [result, metadata] = await sequelize.query(
         `select SUM(gold) from gold where username=:username`,{
