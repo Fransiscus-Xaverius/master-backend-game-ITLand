@@ -24,7 +24,8 @@ const getAllUser = async function (req,res){
     let [result, metadata] = await sequelize.query(
         `SELECT username, SUM(gold) as total_gold
         FROM gold
-        GROUP BY username`
+        GROUP BY username
+        ORDER BY total_gold DESC;`
     )
     console.log(result);
     return res.status(200).send(result);
