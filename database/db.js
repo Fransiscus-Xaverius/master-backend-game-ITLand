@@ -3,7 +3,8 @@ const { Sequelize } = require('sequelize');
 const sequelize = new Sequelize("db_game_master", "root", "", {
     host: "localhost",
     port: 3306,
-    dialect: "mysql"
+    dialect: "mysql",
+    logging:false
 });
 
 sequelize.authenticate()
