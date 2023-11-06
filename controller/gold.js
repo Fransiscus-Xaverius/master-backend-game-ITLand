@@ -48,16 +48,53 @@ const getGold = async function(req,res){
     res.status(400).send({msg:"error"});
 }
 
+const getLastAttack = async function(req,res){
+    console.log("get-last-attack called");
+    const username = req.query.username;
+    try {
+        let [result, metadata] = await sequelize.query(
+        `select * from gold where username=:username and username!=sender ORDER BY id DESC LIMIT 1`,{
+            replacements:{
+                username:username
+            }
+        })
+        if(result[0]){
+            return res.status(200).send(result[0]);
+        }  
+        res.status(404).send({msg:"no attack"});
+    } catch (error) {
+        res.status(400).send({msg:"error"});
+    }
+}
+
+const seeAttack = async function(req,res){
+    const id = req.query.id;
+    try {
+        let [result, metadata] = await sequelize.query(
+            `update gold set seen=1 where id=:id`,{
+                replacements:{
+                    id:id
+                }
+            }
+        )
+        return res.status(200).send({msg:`seen ${id}`})
+    } catch (error) {
+        return res.status(400).send({"msg":"error"})
+    }
+}
+
 const addGold = async function(req,res){
     const amount = req.query.amount;
     const username = req.query.username;
+    const sender = req.query.sender;
 
     let [result, metadata] = await sequelize.query(
-        `insert into gold (username,gold) values(:username, :amount)`,
+        `insert into gold (username,gold,sender) values(:username, :amount, :sender)`,
         {
             replacements:{
                 username:username,
-                amount:amount
+                amount:amount,
+                sender:sender
             }
         }
     )
@@ -74,4 +111,4 @@ const addGold = async function(req,res){
     return res.status(200).send({msg:"updated gold"})
 }
 
-module.exports = {getUser,getUserCount,addGold,getGold,getAllUser};
+module.exports = {getUser,getUserCount,addGold,getGold,getAllUser, getLastAttack, seeAttack};

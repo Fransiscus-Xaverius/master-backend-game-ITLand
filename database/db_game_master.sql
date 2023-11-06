@@ -31,29 +31,22 @@ use db_game_master;
 --
 
 CREATE TABLE `gold` (
+  `id` int(11) NOT NULL,
   `username` varchar(128) NOT NULL,
-  `gold` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+  `gold` int(11) NOT NULL,
+  `sender` varchar(256) NOT NULL,
+  `seen` tinyint(1) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `gold`
 --
 
-INSERT INTO `gold` (`username`, `gold`) VALUES
-('frans-1', -1000),
-('frans-1', -1000),
-('frans-1', 100),
-('frans-1', 100),
-('frans-1', 100),
-('frans-1', 100),
-('frans-1', 19),
-('frans-1', 46),
-('frans-1', 38),
-('frans-1', 45),
-('frans-1', 43),
-('frans-1', 40),
-('frans-1', 56),
-('frans-1', 60);
+INSERT INTO `gold` (`id`, `username`, `gold`, `sender`, `seen`) VALUES
+(1, 'test1', 10000, 'test1', 1),
+(2, 'test1', -1000, 'frans', 0),
+(3, 'test1', -1000, 'frans', 1),
+(4, 'test1', -1000, 'frans', 1);
 
 -- --------------------------------------------------------
 
