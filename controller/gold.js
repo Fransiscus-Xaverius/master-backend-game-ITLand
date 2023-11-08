@@ -9,43 +9,60 @@ const getUserCount = async function () {
 
 const getUser = async function(req,res){
     const key = req.user_key;
-    let [result, metadata] =  await sequelize.query(
-        `select * from users where user-key=:key`,
-        {
-            replacements:{
-                key:key
+    try {
+        let [result, metadata] =  await sequelize.query(
+            `select * from users where user-key=:key`,
+            {
+                replacements:{
+                    key:key
+                }
             }
-        }
-    )
-    return res.status(200).send(result[0]);
+        )
+        return res.status(200).send(result[0]);
+    } catch (error) {
+        return res.status(404).send({msg:"user not found"});
+    }
 }
 
 const getAllUser = async function (req,res){
-    let [result, metadata] = await sequelize.query(
-        `SELECT username, SUM(gold) as total_gold
-        FROM gold
-        GROUP BY username
-        ORDER BY total_gold DESC;`
-    )
-    console.log(result);
-    return res.status(200).send(result);
+    try {
+        let [result, metadata] = await sequelize.query(
+            `SELECT username, SUM(gold) as total_gold
+            FROM gold
+            GROUP BY username
+            ORDER BY total_gold DESC;`
+        )
+        if(result){
+            console.log(result);
+            return res.status(200).send(result);
+        }
+        return res.status(200).send([]) //send empty array
+    } catch (error) {
+        return res.status(400).send({msg:"error"});
+    }
 }
 
 const getGold = async function(req,res){
     console.log('get-gold called');
     const username = req.query.username;
-    let [result, metadata] = await sequelize.query(
-        `select SUM(gold) from gold where username=:username`,{
-            replacements:{
-                username:username
+    try {
+        let [result, metadata] = await sequelize.query(
+            `select SUM(gold) from gold where username=:username`,{
+                replacements:{
+                    username:username
+                }
             }
+        )
+        if(result){
+            console.log(result[0]);
+            return res.status(200).send(result[0]);
         }
-    )
-    if(result){
-        console.log(result[0]);
-        return res.status(200).send(result[0]);
+        return res.status(200).send({data:{
+            "SUM(gold)":0
+        }})
+    } catch (error) {
+        res.status(400).send({msg:"error"});
     }
-    res.status(400).send({msg:"error"});
 }
 
 const getLastAttack = async function(req,res){
@@ -83,32 +100,62 @@ const seeAttack = async function(req,res){
     }
 }
 
+const inflasi = async function(req,res){
+    let pengguna = req.query.pengguna;
+    if(pengguna=="admin"){
+        try {
+            let [result, metadata] = await sequelize.query(
+                `select username from gold group by username`
+            )
+            console.log(result);
+            for(let i = 0;i<result[0].length;i++){
+                let [foo, m] = await sequelize.query(
+                    `insert into gold (username,gold,sender,seen) values(:username, 100, "inflasi", 0)`,
+                    {
+                        replacements:{
+                            username:result[0][i].username
+                        }
+                    }
+                )
+            }
+            return res.status(200).send({msg:"inflasi"});
+        } catch (error) {
+            return res.status(400).send({msg:"sapa kau anjing"});
+        }
+    }
+    return res.status(400).send({msg:"sapa kamu anjing"});
+}
+
 const addGold = async function(req,res){
     const amount = req.query.amount;
     const username = req.query.username;
     const sender = req.query.sender;
 
-    let [result, metadata] = await sequelize.query(
-        `insert into gold (username,gold,sender) values(:username, :amount, :sender)`,
-        {
-            replacements:{
-                username:username,
-                amount:amount,
-                sender:sender
+    try {
+        let [result, metadata] = await sequelize.query(
+            `insert into gold (username,gold,sender) values(:username, :amount, :sender)`,
+            {
+                replacements:{
+                    username:username,
+                    amount:amount,
+                    sender:sender
+                }
             }
-        }
-    )
-
-    let [foo , m] = await sequelize.query(
-        `select SUM(gold) as SUM from gold where username=:username`,
-        {
-            replacements:{
-                username:username
+        )
+    
+        let [foo , m] = await sequelize.query(
+            `select SUM(gold) as SUM from gold where username=:username`,
+            {
+                replacements:{
+                    username:username
+                }
             }
-        }
-    )
-
-    return res.status(200).send({msg:"updated gold"})
+        )
+    
+        return res.status(200).send({msg:"updated gold"})
+    } catch (error) {
+        return res.status(400).send({msg:"error"});
+    }
 }
 
-module.exports = {getUser,getUserCount,addGold,getGold,getAllUser, getLastAttack, seeAttack};
+module.exports = {getUser,getUserCount,addGold,getGold,getAllUser, getLastAttack, seeAttack, inflasi};
